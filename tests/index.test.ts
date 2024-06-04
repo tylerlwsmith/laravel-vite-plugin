@@ -81,6 +81,45 @@ describe('laravel-vite-plugin', () => {
         expect(ssrConfig.build.rollupOptions.input).toBe('resources/js/ssr.ts')
     })
 
+    it('accepts a single input within a full configuration', () => {
+        const plugin = laravel({
+            input: 'resources/js/app.ts',
+            ssr: 'resources/js/ssr.ts',
+        })[0]
+
+        const config = plugin.config({}, { command: 'build', mode: 'production' })
+        expect(config.build.rollupOptions.input).toBe('resources/js/app.ts')
+
+        const ssrConfig = plugin.config({ build: { ssr: true } }, { command: 'build', mode: 'production' })
+        expect(ssrConfig.build.rollupOptions.input).toBe('resources/js/ssr.ts')
+    })
+
+    it('accepts an array of inputs within a full configuration', () => {
+        const plugin = laravel({
+            input: ['resources/js/app.ts', 'resources/js/other.js'],
+            ssr: ['resources/js/ssr.ts', 'resources/js/other.js'],
+        })[0]
+
+        const config = plugin.config({}, { command: 'build', mode: 'production' })
+        expect(config.build.rollupOptions.input).toEqual(['resources/js/app.ts', 'resources/js/other.js'])
+
+        const ssrConfig = plugin.config({ build: { ssr: true } }, { command: 'build', mode: 'production' })
+        expect(ssrConfig.build.rollupOptions.input).toEqual(['resources/js/ssr.ts', 'resources/js/other.js'])
+    })
+
+    it('accepts an input object within a full configuration', () => {
+        const plugin = laravel({
+            input: { app: 'resources/js/entrypoint-browser.js' },
+            ssr: { ssr: 'resources/js/entrypoint-ssr.js' },
+        })[0]
+
+        const config = plugin.config({}, { command: 'build', mode: 'production' })
+        expect(config.build.rollupOptions.input).toEqual({ app: 'resources/js/entrypoint-browser.js' })
+
+        const ssrConfig = plugin.config({ build: { ssr: true } }, { command: 'build', mode: 'production' })
+        expect(ssrConfig.build.rollupOptions.input).toEqual({ ssr: 'resources/js/entrypoint-ssr.js' })
+    })
+
     it('respects the users build.manifest config option', () => {
         const plugin = laravel({
             input: 'resources/js/app.js',
